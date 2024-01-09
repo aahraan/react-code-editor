@@ -3,10 +3,9 @@ import CodeEditorWindow from "./CodeEditorWindow";
 import axios from "axios";
 import { classnames } from "../utils/general";
 import { languageOptions } from "../constants/languageOptions";
-
+import useTraverseTree from "../hooks/useTraverseTree";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
 import { defineTheme } from "../lib/defineTheme";
 import useKeyPress from "../hooks/useKeyPress";
 import Footer from "./Footer";
@@ -15,6 +14,9 @@ import CustomInput from "./CustomInput";
 import OutputDetails from "./OutputDetails";
 import ThemeDropdown from "./ThemeDropdown";
 import LanguagesDropdown from "./LanguagesDropdown";
+import Folder from "./Folder";
+import {data} from "../db/data";
+
 
 const javascriptDefault = `/**
 * Problem: Binary Search: Search a sorted array for a target value.
@@ -46,6 +48,7 @@ const target = 5;
 console.log(binarySearch(arr, target));
 `;
 
+
 const Landing = () => {
   const [code, setCode] = useState(javascriptDefault);
   const [customInput, setCustomInput] = useState("");
@@ -56,6 +59,22 @@ const Landing = () => {
 
   const enterPress = useKeyPress("Enter");
   const ctrlPress = useKeyPress("Control");
+
+  const [explorerData, setExplorerData] = useState(data);
+  const { insertNode, deleteNode, renameNode } = useTraverseTree();
+
+  const handleInsertNode = (folderId, item, isFolder) => {
+  const finalTree = insertNode(explorerData, folderId, item, isFolder);
+  setExplorerData(finalTree);
+};
+const handleDeleteNode = (itemId) => {
+  const finalTree = deleteNode(explorerData, itemId);
+  setExplorerData(finalTree);
+};
+const handleRenameNode = (itemId, newName) => {
+  const finalTree = renameNode(explorerData, itemId, newName);
+  setExplorerData(finalTree);
+};
 
   const onSelectChange = (sl) => {
     console.log("selected Option...", sl);
@@ -204,6 +223,7 @@ const Landing = () => {
   };
 
   return (
+    
     <>
       <ToastContainer
         position="top-right"
@@ -256,6 +276,15 @@ const Landing = () => {
         </div>
       </div>
       <div className="flex flex-row space-x-4 items-start px-4 py-4">
+      <div className="left-container flex flex-shrink-0 w-[10%] flex-col fileexplorer">
+      <h2>File Explorer</h2>
+      <Folder 
+      explorerData={explorerData} 
+      handleInsertNode={handleInsertNode}
+      handleDeleteNode={handleDeleteNode}
+      handleRenameNode={handleRenameNode}
+      />
+      </div>
         <div className="flex flex-col w-full h-full justify-start items-end">
           <CodeEditorWindow
             code={code}
@@ -265,7 +294,7 @@ const Landing = () => {
           />
         </div>
 
-        <div className="right-container flex flex-shrink-0 w-[30%] flex-col">
+        <div className="right-container flex flex-shrink-0 w-[20%] flex-col">
           <OutputWindow outputDetails={outputDetails} />
           <div className="flex flex-col items-end">
             <CustomInput
