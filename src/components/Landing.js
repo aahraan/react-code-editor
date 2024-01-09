@@ -82,12 +82,15 @@ const Landing = () => {
   };
   const handleCompile = () => {
     setProcessing(true);
+    console.log(language.id);
     const formData = {
       language_id: language.id,
       // encode source code in base64
       source_code: btoa(code),
       stdin: btoa(customInput),
     };
+    console.log("Host:",process.env.REACT_APP_RAPID_API_HOST);
+    console.log("Key:",process.env.REACT_APP_RAPID_API_KEY);
     const options = {
       method: "POST",
       url: process.env.REACT_APP_RAPID_API_URL,
